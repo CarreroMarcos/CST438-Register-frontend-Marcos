@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import PropTypes from "prop-types";
+import { SERVER_URL } from "../constants";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
@@ -9,117 +9,95 @@ import TextField from "@mui/material/TextField";
 
 const EditStudent = (props) => {
   const [open, setOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    id: 0,
-    name: "",
-    studentEmail: "",
-    statusCode: 0,
-    status: "",
-  });
+  const [editMessage, setEditMessage] = useState("");
+  const [student, setStudent] = useState(props.student);
 
-  const [isValidEmail, setIsValidEmail] = useState(false);
-
-  const editStudent = props.editStudent.editStudent;
-  const students = props.editStudent.students;
-
-  const handleClickOpen = () => {
+  const editOpen = (event) => {
     setOpen(true);
+    setEditMessage("");
   };
 
-  const handleClose = () => {
+  const editClose = () => {
     setOpen(false);
+    props.onClose();
   };
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-
-    if (name === "studentEmail") {
-      setIsValidEmail(validateEmail(value));
-    }
+  const editChange = (event) => {
+    setStudent({ ...student, [event.target.name]: event.target.value });
+    console.log("editChange: " +  event.target.value);
   };
 
-  const handleAdd = () => {
-    for (let i = 0; i < students.length; i++) {
-      if (formData.studentEmail === students[i].studentEmail) {
-        window.alert("Email already taken!");
-        return;
-      }
-    }
-    editStudent(formData);
-    handleClose();
+  const editSave = () => {
+    console.log("editStudent " + JSON.stringify(student));
+    fetch(`${SERVER_URL}/student/${student.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(student),
+    })
+      .then((response) => {
+        if (response.ok) {
+          document.getElementById("editEmail").value = '';
+          editClose();
+          return;
+        } else return response.json();
+      })
+      .then((data) => {
+        if (data) {
+          if (data.message)
+            setEditMessage("Student not saved. " + data.message);
+          else setEditMessage("Student not saved.");
+        } else setEditMessage("Student saved.");
+      })
+      .catch((err) => {
+        setEditMessage("Error. " + err);
+      });
   };
-
-  function validateEmail(email) {
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return regex.test(email);
-  }
 
   return (
     <div>
-        <Button id="addCourse" variant="outlined" color="primary" style={{margin: 10}} onClick={handleClickOpen}>
-          Edit Student
-        </Button>
-      <Dialog open={open} onClose={handleClose}>
+      <button type="button" id={"editStudent" + student.id} margin="auto" onClick={editOpen}>
+        Edit
+      </button>
+      <Dialog open={open}>
         <DialogTitle>Edit Student</DialogTitle>
         <DialogContent style={{ paddingTop: 20 }}>
+          <h4>{editMessage}</h4>
+          <TextField
+            fullWidth
+            label="student id"
+            name="id"
+            value={student.id}
+            InputProps={{ readOnly: true }}
+          />
           <TextField
             autoFocus
             fullWidth
-            label="Student ID"
-            name="id"
-            onChange={handleChange}
-          />
-          <TextField
-            fullWidth
-            label="Student Name"
+            label="name"
             name="name"
-            onChange={handleChange}
+            id="editName"
+            value={student.name}
+            onChange={editChange}
           />
           <TextField
             fullWidth
-            label="Student Email"
+            label="email"
             name="studentEmail"
-            onChange={handleChange}
+            id="editEmail"     
+            value={student.studentEmail}    
+            onChange={editChange}
           />
-          <TextField
-            fullWidth
-            label="Status Code"
-            name="statusCode"
-            type="number"
-            onChange={handleChange}
-          />
-          <TextField
-            fullWidth
-            label="Status"
-            name="status"
-            onChange={handleChange}
-          />{" "}
-          <br></br>
-          <span id="warning">
-            {isValidEmail ? "Valid email" : "Invalid email"}
-          </span>
         </DialogContent>
         <DialogActions>
-          <Button color="secondary" onClick={handleClose}>
-            Cancel
+          <Button color="secondary" onClick={editClose}>
+            Close
           </Button>
-          <Button id="add" color="primary" onClick={handleAdd}>
-            update
+          <Button color="primary" id="saveEdit" onClick={editSave}>
+            Save
           </Button>
         </DialogActions>
       </Dialog>
     </div>
   );
-};
-
-// required property:  addCourse is a function to call to perform the Add action
-EditStudent.propTypes = {
-  EditStudent: PropTypes.func.isRequired,
 };
 
 export default EditStudent;

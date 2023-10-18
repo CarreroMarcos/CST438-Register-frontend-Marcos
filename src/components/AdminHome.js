@@ -4,7 +4,6 @@ import EditStudent from "./EditStudent";
 import {SERVER_URL} from '../constants';
 
 const AdminHome = () => {
-  const params = new URLSearchParams(window.location.search);
   const [students, setStudents] = useState([]); // list of students
   const [message, setMessage] = useState(" "); // status message
 
@@ -27,73 +26,10 @@ const AdminHome = () => {
         setMessage("Exception. " + err);
       });
   };
-
-	const addStudent = (newStudent) => {
+	const refreshStudents = () => {
 		setMessage('');
-		console.log("start addStudent"); 
-
-		const studentData = {
-			name: newStudent.name,
-			studentEmail: newStudent.studentEmail,
-			statusCode: newStudent.statusCode,
-			status: newStudent.status
-		};
-
-		fetch(`${SERVER_URL}/student`,
-		{ 
-			method: 'POST',
-			headers: {
-			  'Content-Type': 'application/json'
-			},
-			body: JSON.stringify(studentData) 
-		})
-		.then(res => {
-			if (res.ok) {
-			console.log("addStudent ok");
-			setMessage("Student added.");
-			fetchStudents();
-			} else {
-			console.log('error addStudent ' + res.status);
-			setMessage("Error. "+res.status);
-			}})
-		.catch(err => {
-			console.error("exception addStudent "+ err);
-			setMessage("Exception. "+err);
-		})
-	}
-
-	const editStudent = (newData) => {
-
-		const studentData = {
-			id: newData.id,
-			name: newData.name,
-			studentEmail: newData.studentEmail,
-			statusCode: newData.statusCode,
-			status: newData.status
-		};
-
-		fetch(`${SERVER_URL}/student/${studentData.id}`, {
-		  method: 'PUT', 
-		  headers: {
-			'Content-Type': 'application/json',
-		  },
-		  body: JSON.stringify(studentData),
-		})
-		  .then((res) => {
-			if (res.ok) {
-			  console.log('Student updated successfully');
-			  setMessage("Student updated.");
-			  fetchStudents();
-			} else {
-			  console.error('Error updating student:', res.status);
-			  setMessage("Error. "+res.status);
-			}
-		  })
-		  .catch((err) => {
-			console.error('Exception while updating student:', err);
-			setMessage("Exception. "+err);
-		  });
-	  };
+		fetchStudents();
+	}  	
 
     const dropStudent = (event) => {
 		setMessage('');
@@ -173,13 +109,13 @@ const AdminHome = () => {
 						<td>{row.studentEmail}</td>
 						<td>{row.statusCode}</td>
 						<td>{row.status}</td>
-						<td><button type="button" margin="auto" onClick={dropStudent}>Drop</button></td>
+						<td><EditStudent student={row} onClose={refreshStudents} /></td>
+						<td><button type="button" margin="auto" id={"drop" + (row.id)} onClick={dropStudent}>Drop</button></td>
 					</tr>
 					))}
 				</tbody>
 				</table>
-				<AddStudent addStudent={{ addStudent, students }} />
-				<EditStudent editStudent={{ editStudent, students }} />
+				<AddStudent onClose={refreshStudents} />
 			</div>
 			</div>
 		);
