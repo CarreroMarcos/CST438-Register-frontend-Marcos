@@ -7,6 +7,8 @@ const AdminHome = () => {
   const [students, setStudents] = useState([]); // list of students
   const [message, setMessage] = useState(" "); // status message
 
+  const token = sessionStorage.getItem("jwt");
+
   useEffect(() => {
 
     fetchStudents();
@@ -14,7 +16,11 @@ const AdminHome = () => {
 
   const fetchStudents = () => {
     console.log("Fetching students");
-    fetch(`${SERVER_URL}/student`)
+    fetch(`${SERVER_URL}/student`,
+	{
+		headers: {'Authorization' : token},
+	}
+	)
       .then((response) => {
         return response.json();
       })
@@ -42,6 +48,7 @@ const AdminHome = () => {
 		if (useForce) {
 		  fetch(`${SERVER_URL}/student/${id}?force=true`, {
 			method: 'DELETE',
+			headers: {'Authorization' : token},
 		  })
 			.then(res => {
 			  if (res.ok) {
@@ -60,6 +67,7 @@ const AdminHome = () => {
 		} else {
 		  fetch(`${SERVER_URL}/student/${id}`, {
 			method: 'DELETE',
+			headers: {'Authorization' : token},
 		  })
 			.then(res => {
 			  if (res.ok) {

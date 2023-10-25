@@ -13,7 +13,6 @@ function AddCourse(props) {
 
   const [open, setOpen] = useState(false);
   const [course_id, setCourse_id] = useState(0);
- 
   
   const handleClickOpen = () => {
     setOpen(true);

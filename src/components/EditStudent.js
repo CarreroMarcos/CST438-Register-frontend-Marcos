@@ -6,11 +6,14 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
+import {BrowserRouter, Switch, Route, Link} from 'react-router-dom';
 
 const EditStudent = (props) => {
   const [open, setOpen] = useState(false);
   const [editMessage, setEditMessage] = useState("");
   const [student, setStudent] = useState(props.student);
+
+  const token = sessionStorage.getItem("jwt");
 
   const editOpen = (event) => {
     setOpen(true);
@@ -31,7 +34,7 @@ const EditStudent = (props) => {
     console.log("editStudent " + JSON.stringify(student));
     fetch(`${SERVER_URL}/student/${student.id}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", 'Authorization' : token},
       body: JSON.stringify(student),
     })
       .then((response) => {

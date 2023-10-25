@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import {SEMESTERS} from '../constants'
+import {SEMESTERS} from '../constants';
+import {BrowserRouter, Switch, Route, Link} from 'react-router-dom';
 
   /* 
    *  display list of terms (year, semester) from SEMESTERS list
@@ -9,7 +9,7 @@ import {SEMESTERS} from '../constants'
 function StudentHome( ) {
 
   const [termId, setTermId] = useState(-1);
-
+  const token = sessionStorage.getItem("jwt");
   const onRadioClick = (event) => {
     const row_id = event.target.parentNode.parentNode.rowIndex - 1;
     console.log("radioClick "+row_id);
